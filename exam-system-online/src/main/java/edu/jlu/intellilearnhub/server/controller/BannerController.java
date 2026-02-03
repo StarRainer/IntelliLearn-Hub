@@ -86,7 +86,7 @@ public class BannerController {
      */
     @GetMapping("/{id}")  // 处理GET请求
     @Operation(summary = "根据ID获取轮播图", description = "根据轮播图ID获取单个轮播图的详细信息")  // API描述  
-    public Result<Banner> getBannerById(@Parameter(description = "轮播图ID") @PathVariable Long id) {
+    public Result<Banner> getBannerById(@Parameter(description = "轮播图ID") @PathVariable("id") Long id) {
         Banner banner = bannerService.getById(id);
         log.info("查询轮播图成功：id={}, banner={}", id, banner);
         return Result.success(banner);
@@ -100,7 +100,9 @@ public class BannerController {
     @PostMapping("/add")  // 处理POST请求
     @Operation(summary = "添加轮播图", description = "创建新的轮播图，需要提供图片URL、标题、跳转链接等信息")  // API描述
     public Result<String> addBanner(@RequestBody Banner banner) {
-        return null;
+        bannerService.save(banner);
+        log.info("添加轮播图成功：id={}", banner.getId());
+        return Result.success("轮播图添加成功");
     }
     
     /**
@@ -111,7 +113,9 @@ public class BannerController {
     @PutMapping("/update")  // 处理PUT请求
     @Operation(summary = "更新轮播图", description = "更新轮播图的信息，包括图片、标题、跳转链接、排序等")  // API描述
     public Result<String> updateBanner(@RequestBody Banner banner) {
-        return null;
+        bannerService.updateById(banner);
+        log.info("轮播图更新成功：banner={}", banner);
+        return Result.success("轮播图更新成功");
     }
     
     /**
@@ -121,7 +125,7 @@ public class BannerController {
      */
     @DeleteMapping("/delete/{id}")  // 处理DELETE请求
     @Operation(summary = "删除轮播图", description = "根据ID删除指定的轮播图")  // API描述
-    public Result<String> deleteBanner(@Parameter(description = "轮播图ID") @PathVariable Long id) {
+    public Result<String> deleteBanner(@Parameter(description = "轮播图ID") @PathVariable("id") Long id) {
         bannerService.removeById(id);
         log.info("删除id={}轮播图成功", id);
         return Result.success("删除轮播图成功");
@@ -136,7 +140,7 @@ public class BannerController {
     @PutMapping("/toggle/{id}")  // 处理PUT请求
     @Operation(summary = "切换轮播图状态", description = "启用或禁用指定的轮播图，禁用后不会在前台显示")  // API描述
     public Result<String> toggleBannerStatus(
-            @Parameter(description = "轮播图ID") @PathVariable Long id, 
+            @Parameter(description = "轮播图ID") @PathVariable("id") Long id,
             @Parameter(description = "是否启用，true为启用，false为禁用") @RequestParam Boolean isActive) {
         bannerService.update(new LambdaUpdateWrapper<Banner>()
                 .eq(Banner::getId, id)
