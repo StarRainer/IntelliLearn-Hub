@@ -7,3 +7,12 @@
 /dataSources/
 /dataSources.local.xml
 /checkstyle-idea.xml
+/compiler.xml
+/dataSources.xml
+/encodings.xml
+/GitCommitMessageStorage.xml
+/IntelliLearn-Hub.iml
+/jarRepositories.xml
+/modules.xml
+/misc.xml
+/vcs.xml

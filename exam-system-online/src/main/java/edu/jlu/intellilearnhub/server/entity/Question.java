@@ -11,18 +11,10 @@ import java.math.BigDecimal;
  * 题目实体类 - 考试题目信息模型
  * 
  * 这是系统的核心实体类之一，用于存储各种类型的考试题目
- * 
- * MyBatis Plus高级特性教学：
- * 1. @TableField(exist = false)：标记非数据库字段，用于关联查询结果
- * 2. FieldFill.INSERT/INSERT_UPDATE：自动填充创建和更新时间
- * 3. 实体类关联：通过@TableField(exist = false)实现多表关联
- * 
  * 业务设计：
  * - 支持多种题型：选择题(CHOICE)、判断题(JUDGE)、简答题(TEXT)
  * - 支持难度分级：简单(EASY)、中等(MEDIUM)、困难(HARD)
  * - 支持分类管理：通过categoryId关联分类表
- * 
- * @author 智能学习平台开发团队
  * @version 1.0
  */
 @Data  // Lombok注解：自动生成所有getter、setter方法

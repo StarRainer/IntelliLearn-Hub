@@ -1,6 +1,7 @@
 package edu.jlu.intellilearnhub.server.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -15,14 +16,18 @@ public class BaseEntity implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @Schema(description = "创建时间")
     private Date createTime;
 
+    @JsonIgnore
     @Schema(description = "修改时间")
     private Date updateTime;
 
+    @JsonIgnore
     @Schema(description = "逻辑删除")
     @TableField("is_deleted")
+    @TableLogic(value = "0", delval = "1")
     private Byte isDeleted;
 
 }

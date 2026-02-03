@@ -11,19 +11,11 @@ import java.time.LocalDateTime;
 
 /**
  * 用户实体类 - 系统用户信息模型
- * 
- * MyBatis Plus教学要点：
- * 1. @TableName注解：指定对应的数据库表名
- * 2. @TableId注解：标识主键字段，AUTO表示数据库自增
- * 3. @TableField注解：处理字段映射，特别是驼峰命名与下划线的转换
- * 4. @Data注解：Lombok自动生成getter/setter、toString等方法
- * 
  * 数据库设计：
  * - 对应表：users
  * - 主键：id（自增）
  * - 索引：username（唯一索引）
- * 
- * @author 智能学习平台开发团队
+ *
  * @version 1.0
  */
 @Data  // Lombok注解：自动生成getter、setter、toString、equals、hashCode方法
