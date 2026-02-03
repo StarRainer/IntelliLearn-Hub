@@ -2,6 +2,7 @@ package edu.jlu.intellilearnhub.server.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import edu.jlu.intellilearnhub.server.common.Result;
 import edu.jlu.intellilearnhub.server.entity.Banner;
 import edu.jlu.intellilearnhub.server.service.BannerService;
@@ -115,7 +116,9 @@ public class BannerController {
     @DeleteMapping("/delete/{id}")  // 处理DELETE请求
     @Operation(summary = "删除轮播图", description = "根据ID删除指定的轮播图")  // API描述
     public Result<String> deleteBanner(@Parameter(description = "轮播图ID") @PathVariable Long id) {
-        return null;
+        bannerService.removeById(id);
+        log.info("后台管理系统删除id={}轮播图成功", id);
+        return Result.success("删除轮播图成功");
     }
     
     /**
@@ -129,6 +132,11 @@ public class BannerController {
     public Result<String> toggleBannerStatus(
             @Parameter(description = "轮播图ID") @PathVariable Long id, 
             @Parameter(description = "是否启用，true为启用，false为禁用") @RequestParam Boolean isActive) {
-        return null;
+        bannerService.update(new LambdaUpdateWrapper<Banner>()
+                .eq(Banner::getId, id)
+                .set(Banner::getIsActive, isActive)
+        );
+        log.info("后台管理系统切换轮播图状态成功");
+        return Result.success("轮播图状态修改成功");
     }
 } 
