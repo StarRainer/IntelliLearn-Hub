@@ -1,12 +1,8 @@
 package edu.jlu.intellilearnhub.server.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * 轮播图实体类 - 首页轮播图展示信息
