@@ -55,13 +55,13 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
             notice.setCreateTime(new Date());
             notice.setUpdateTime(new Date());
             if (notice.getIsActive() == null) {
-                notice.setIsActive(true); // 默认启用
+                notice.setIsActive(true);
             }
             if (notice.getPriority() == null) {
-                notice.setPriority(0); // 默认普通优先级
+                notice.setPriority(0);
             }
             if (notice.getType() == null) {
-                notice.setType("NOTICE"); // 默认通知类型
+                notice.setType("NOTICE");
             }
 
             boolean success = this.save(notice);
