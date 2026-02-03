@@ -17,22 +17,12 @@ import java.util.stream.Collectors;
 
 /**
  * 题目控制器 - 处理题目相关的HTTP请求
- * 
- * Spring MVC架构教学要点：
- * 1. Controller层：负责接收HTTP请求，调用Service层处理业务逻辑，返回响应
- * 2. RESTful API设计：使用HTTP方法语义（GET查询、POST创建、PUT更新、DELETE删除）
- * 3. 依赖注入：通过@Autowired注解注入Service和Mapper依赖
- * 4. 请求映射：通过@RequestMapping系列注解映射URL路径到处理方法
- * 5. 参数绑定：自动将HTTP请求参数绑定到方法参数
- * 6. 数据返回：统一使用Result包装返回数据，便于前端处理
- * 
  * 业务功能：
  * - 题目的CRUD操作（创建、查询、更新、删除）
  * - 多条件筛选和分页查询
  * - 随机题目获取（用于自动组卷）
  * - 热门题目展示（用于首页推荐）
- * 
- * @author 智能学习平台开发团队
+ *
  * @version 1.0
  */
 @RestController  // @Controller + @ResponseBody，表示这是一个REST控制器，返回JSON数据

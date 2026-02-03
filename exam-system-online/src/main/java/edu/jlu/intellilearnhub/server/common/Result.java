@@ -2,41 +2,7 @@ package edu.jlu.intellilearnhub.server.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/**
- * 统一响应结果封装类 - RESTful API标准响应格式
- * 
- * 设计目的：
- * 1. 统一API响应格式，便于前端统一处理
- * 2. 封装业务状态码和错误信息，提高可读性
- * 3. 支持泛型，灵活处理不同类型的返回数据
- * 4. 提供静态工厂方法，简化对象创建过程
- * 
- * 响应格式设计：
- * {
- *   "code": 200,           // 业务状态码
- *   "message": "操作成功",  // 响应消息
- *   "data": {...}          // 具体数据（可为null）
- * }
- * 
- * HTTP状态码 vs 业务状态码：
- * - HTTP状态码：由Web服务器返回，表示HTTP请求的状态
- * - 业务状态码：由应用程序定义，表示业务操作的结果
- * - 本系统约定：200成功，500业务失败，可扩展其他错误码
- * 
- * 前后端协作：
- * - 前端根据code字段判断操作是否成功
- * - message字段可直接显示给用户
- * - data字段包含具体的业务数据
- * 
- * Java泛型教学：
- * - <T> 表示泛型类型参数，T可以是任意类型
- * - 静态方法中的<T>是方法级别的泛型声明
- * - 泛型擦除：运行时泛型信息会被擦除，编译时类型检查
- * 
- * @param <T> 返回数据的类型，可以是任何Java对象
- * @author 智能学习平台开发团队
- * @version 1.0
- */
+
 @Schema(description = "统一API响应结果")
 public class Result<T> {
     

@@ -10,3 +10,13 @@ server:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+intellilearn-hub:
+  minio:
+    access-key: ${MINIO_ACCESS_KEY:iMxRDoXHvtwE4TzKf3Do}
+    secret-key: ${MINIO_SECRET_KEY:VsJMojzi9a0LI7lFJMHd5tuOgOl58vioKoWOo1te}
+    bucket-name: ${MINIO_BUCKET_NAME:intellilearn-hub}
+    endpoint: ${MINIO_ENDPOINT:http://192.168.221.100:9000}
+logging:
+  level:
+    root: info
+    edu.jlu.intellilearnhub.server: debug
