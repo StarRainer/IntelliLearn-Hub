@@ -6,6 +6,7 @@ import edu.jlu.intellilearnhub.server.service.NoticeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,7 @@ public class NoticeController {
     @GetMapping("/latest")  // 处理GET请求
     @Operation(summary = "获取最新公告", description = "获取最新发布的公告列表，用于首页推荐展示")  // API描述
     public Result<List<Notice>> getLatestNotices(
-            @Parameter(description = "限制数量", example = "5") @RequestParam(defaultValue = "5") int limit) {
+            @Parameter(description = "限制数量", example = "5") @RequestParam(value = "limit", defaultValue = "5") int limit) {
         return noticeService.getLatestNotices(limit);
     }
     
@@ -67,7 +68,7 @@ public class NoticeController {
     @GetMapping("/{id}")  // 处理GET请求
     @Operation(summary = "根据ID获取公告", description = "根据公告ID获取单个公告的详细信息")  // API描述
     public Result<Notice> getNoticeById(
-            @Parameter(description = "公告ID") @PathVariable Long id) {
+            @Parameter(description = "公告ID") @PathVariable("id") Long id) {
         Notice notice = noticeService.getById(id);
         if (notice != null) {
             return Result.success(notice);
@@ -106,7 +107,7 @@ public class NoticeController {
     @DeleteMapping("/delete/{id}")  // 处理DELETE请求
     @Operation(summary = "删除公告", description = "根据ID删除指定的公告")  // API描述
     public Result<String> deleteNotice(
-            @Parameter(description = "公告ID") @PathVariable Long id) {
+            @Parameter(description = "公告ID") @PathVariable("id") Long id) {
         return noticeService.deleteNotice(id);
     }
     
@@ -119,8 +120,8 @@ public class NoticeController {
     @PutMapping("/toggle/{id}")  // 处理PUT请求
     @Operation(summary = "切换公告状态", description = "启用或禁用指定的公告，禁用后不会在前台显示")  // API描述
     public Result<String> toggleNoticeStatus(
-            @Parameter(description = "公告ID") @PathVariable Long id, 
-            @Parameter(description = "是否启用，true为启用，false为禁用") @RequestParam Boolean isActive) {
+            @Parameter(description = "公告ID") @PathVariable("id") Long id,
+            @Parameter(description = "是否启用，true为启用，false为禁用") @RequestParam("isActive") Boolean isActive) {
         return noticeService.toggleNoticeStatus(id, isActive);
     }
 } 
