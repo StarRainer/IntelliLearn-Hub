@@ -1,0 +1,83 @@
+services:
+  # --- MySQL 服务 ---
+  mysql:
+    image: mysql:9.5.0
+    container_name: hub-mysql
+    # 需要容器开机自启动解除此注释
+    # restart: always
+    environment:
+      # 配置数据库密码
+      MYSQL_ROOT_PASSWORD: 123456
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      # 配置容器的挂载目录
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/logs:/var/log/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- Redis 服务 ---
+  redis:
+    image: redis:8.4.0
+    container_name: hub-redis
+    # 需要容器开机自启动解除此注释
+    # restart: always
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "6379:6379"
+    volumes:
+      # 配置容器的挂载目录
+      - ./redis/data:/data
+      - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
+    # 请在 Redis 文件配置数据库密码
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # --- MinIO 对象存储服务 ---
+  minio:
+    image: minio/minio:RELEASE.2024-01-31T20-20-33Z
+    container_name: hub-minio
+    # 需要容器开机自启动解除此注释
+    # restart: always
+    environment:
+      # 设置管理后台账号
+      MINIO_ROOT_USER: admin
+      # 设置管理后台密码
+      MINIO_ROOT_PASSWORD: 12345678
+      TZ: Asia/Shanghai
+    ports:
+      - "9000:9000" # API 端口 (代码连接用)
+      - "9001:9001" # Console 控制台端口 (浏览器访问用)
+    volumes:
+      # 映射数据目录
+      - ./minio/data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      
+  # --- 前端项目 1 (映射到宿主机 8080) ---
+  frontend-a:
+    build: ./web-8080        
+    container_name: web-8080
+    ports:
+      - "8080:80"            
+
+  # --- 前端项目 2 (映射到宿主机 8081) ---
+  frontend-b:
+    build: ./web-8081        
+    container_name: web-8081
+    ports:
+      - "8081:80"       
