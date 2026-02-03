@@ -56,7 +56,7 @@ public class BannerController {
                 .eq(Banner::getIsActive, true)
                 .orderByAsc(Banner::getSortOrder)
         );
-        log.info("后台管理系统获取启用的轮播图：result={}", banners);
+        log.info("获取启用的轮播图：result={}", banners);
         return Result.success(banners);
     }
     
@@ -70,7 +70,7 @@ public class BannerController {
         List<Banner> banners = bannerService.list(new LambdaQueryWrapper<Banner>()
                 .orderByAsc(Banner::getSortOrder)
         );
-        log.info("后台管理系统获取所有轮播图成功：result={}", banners);
+        log.info("获取所有轮播图成功：result={}", banners);
         return Result.success(banners);
     }
     
@@ -82,8 +82,9 @@ public class BannerController {
     @GetMapping("/{id}")  // 处理GET请求
     @Operation(summary = "根据ID获取轮播图", description = "根据轮播图ID获取单个轮播图的详细信息")  // API描述  
     public Result<Banner> getBannerById(@Parameter(description = "轮播图ID") @PathVariable Long id) {
-
-      return Result.error("轮播图不存在");
+        Banner banner = bannerService.getById(id);
+        log.info("查询轮播图成功：id={}, banner={}", id, banner);
+        return Result.success(banner);
     }
     
     /**
@@ -117,7 +118,7 @@ public class BannerController {
     @Operation(summary = "删除轮播图", description = "根据ID删除指定的轮播图")  // API描述
     public Result<String> deleteBanner(@Parameter(description = "轮播图ID") @PathVariable Long id) {
         bannerService.removeById(id);
-        log.info("后台管理系统删除id={}轮播图成功", id);
+        log.info("删除id={}轮播图成功", id);
         return Result.success("删除轮播图成功");
     }
     
@@ -136,7 +137,7 @@ public class BannerController {
                 .eq(Banner::getId, id)
                 .set(Banner::getIsActive, isActive)
         );
-        log.info("后台管理系统切换轮播图状态成功");
+        log.info("切换id={}的轮播图状态成功", id);
         return Result.success("轮播图状态修改成功");
     }
 } 
