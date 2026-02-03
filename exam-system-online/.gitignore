@@ -34,3 +34,6 @@ build/
 
 **/.gitattributes
 .idea/**
+/.mvn/wrapper/maven-wrapper.properties
+/mvnw
+/mvnw.cmd
