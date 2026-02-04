@@ -35,4 +35,6 @@ public interface QuestionService extends IService<Question> {
     void updateQuestion(Question question);
 
     void removeQuestion(Long id);
+
+    List<Question> listPopularQuestions(Integer size);
 }

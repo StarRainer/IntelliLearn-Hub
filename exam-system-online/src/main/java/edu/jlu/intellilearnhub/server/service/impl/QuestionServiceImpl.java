@@ -25,10 +25,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
@@ -74,6 +71,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             return;
         }
         List<Question> questions = questionPage.getRecords();
+        fillQuestionWithChoiceAndAnswer(questions);
+    }
+
+    private void fillQuestionWithChoiceAndAnswer(List<Question> questions) {
         List<Long> questionIds = questions.stream().map(Question::getId).toList();
 
         Map<Long, QuestionAnswer> questionIdToQuestionAnswer = questionAnswerMapper.selectList(new LambdaQueryWrapper<QuestionAnswer>()
@@ -85,10 +86,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 .orderByAsc(QuestionChoice::getSort)
         ).stream().collect(Collectors.groupingBy(QuestionChoice::getQuestionId));
 
-       questions.forEach(question -> {
-            question.setAnswer(questionIdToQuestionAnswer.getOrDefault(question.getId(), null));
-            question.setChoices(questionIdToQuestionChoices.getOrDefault(question.getId(), null));
-        });
+        questions.forEach(question -> {
+             question.setAnswer(questionIdToQuestionAnswer.getOrDefault(question.getId(), null));
+             question.setChoices(questionIdToQuestionChoices.getOrDefault(question.getId(), null));
+         });
     }
 
     @Override
@@ -231,5 +232,31 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         removeById(id);
         questionChoiceMapper.delete(new LambdaUpdateWrapper<QuestionChoice>().eq(QuestionChoice::getQuestionId, id));
         questionAnswerMapper.delete(new LambdaUpdateWrapper<QuestionAnswer>().eq(QuestionAnswer::getQuestionId, id));
+    }
+
+    @Override
+    public List<Question> listPopularQuestions(Integer size) {
+        if (size <= 0) {
+            throw new CommonException("必须展示大于0数量的热门题目");
+        }
+        Set<Object> popularIds = redisTemplate.opsForZSet().reverseRange(CacheConstants.POPULAR_QUESTIONS_KEY, 0, size - 1);
+        popularIds = popularIds == null ? new HashSet<>() : popularIds;
+        List<Long> questionIds = new ArrayList<>(popularIds.stream().map(id -> Long.valueOf(id.toString())).toList());
+        if (popularIds.size() < size) {
+            List<Long> availableIds = list(new LambdaQueryWrapper<Question>()
+                    .select(Question::getId)
+                    .notIn(!questionIds.isEmpty(), Question::getId, questionIds)
+                    .orderByDesc(Question::getCreateTime)
+                    .last("limit " + (size - popularIds.size()))
+            ).stream().map(Question::getId).toList();
+            questionIds.addAll(availableIds);
+        }
+        if (questionIds.size() < size) {
+            throw new CommonException("少于%s道题目可以展示".formatted(size));
+        }
+        Map<Long, Question> questionIdToQuestion = listByIds(questionIds).stream().collect(Collectors.toMap(Question::getId, Function.identity()));
+        List<Question> result = questionIds.stream().map(questionIdToQuestion::get).toList();
+        fillQuestionWithChoiceAndAnswer(result);
+        return result;
     }
 }
