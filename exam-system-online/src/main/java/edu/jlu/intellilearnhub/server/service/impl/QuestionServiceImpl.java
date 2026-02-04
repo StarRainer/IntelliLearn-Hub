@@ -2,6 +2,7 @@ package edu.jlu.intellilearnhub.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import edu.jlu.intellilearnhub.server.common.CacheConstants;
 import edu.jlu.intellilearnhub.server.entity.Question;
 import edu.jlu.intellilearnhub.server.entity.QuestionAnswer;
 import edu.jlu.intellilearnhub.server.entity.QuestionChoice;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.jlu.intellilearnhub.server.vo.QuestionQueryVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -21,6 +23,8 @@ import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private QuestionChoiceMapper questionChoiceMapper;
     @Autowired
     private QuestionAnswerMapper questionAnswerMapper;
+    @Autowired
+    private ThreadPoolExecutor threadPoolExecutor;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
 
     @Override
@@ -81,6 +89,16 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         if (question == null) {
             return null;
         }
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                Double score = redisTemplate.opsForZSet().incrementScore(CacheConstants.POPULAR_QUESTIONS_KEY, id, 1);
+                log.debug("完成id={}的题目的热榜分数统计：score:{}", id, score);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }, threadPoolExecutor);
+
         List<QuestionChoice> questionChoices = Collections.emptyList();
         if ("CHOICE".equals(question.getType())) {
              questionChoices = questionChoiceMapper.selectList(new LambdaQueryWrapper<QuestionChoice>()
