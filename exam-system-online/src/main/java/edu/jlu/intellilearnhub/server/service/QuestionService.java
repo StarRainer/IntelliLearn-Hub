@@ -29,4 +29,10 @@ public interface QuestionService extends IService<Question> {
     void listQuestion(Page<Question> questionPage, QuestionQueryVo questionQueryVo);
 
     Question getQuestionById(Long id);
+
+    void saveQuestion(Question question);
+
+    void updateQuestion(Question question);
+
+    void removeQuestion(Long id);
 }

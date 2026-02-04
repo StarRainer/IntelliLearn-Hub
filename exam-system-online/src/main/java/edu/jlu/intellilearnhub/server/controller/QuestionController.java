@@ -108,8 +108,9 @@ public class QuestionController {
     @PostMapping  // 映射POST请求到/api/questions
     @Operation(summary = "创建新题目", description = "添加新的考试题目，支持选择题、判断题、简答题等多种题型")  // API描述
     public Result<Question> createQuestion(@RequestBody Question question) {
-
-        return Result.success(null);
+        questionService.saveQuestion(question);
+        log.info("新题目创建成功：question={}", question);
+        return Result.success(question);
     }
     
     /**
@@ -127,9 +128,11 @@ public class QuestionController {
     @PutMapping("/{id}")  // 处理PUT请求
     @Operation(summary = "更新题目信息", description = "修改指定题目的内容、选项、答案等信息")  // API描述
     public Result<Question> updateQuestion(
-            @Parameter(description = "题目ID") @PathVariable Long id, 
+            @Parameter(description = "题目ID") @PathVariable("id") Long id,
             @RequestBody Question question) {
-        return Result.success(null);
+        questionService.updateQuestion(question);
+        log.info("id={}的题目信息更新成功：question={}", id, question);
+        return Result.success(question);
     }
     
     /**
@@ -149,13 +152,10 @@ public class QuestionController {
     @DeleteMapping("/{id}")  // 处理DELETE请求
     @Operation(summary = "删除题目", description = "根据ID删除指定的题目，包括关联的选项和答案数据")  // API描述
     public Result<String> deleteQuestion(
-            @Parameter(description = "题目ID") @PathVariable Long id) {
-        // 根据操作结果返回不同的响应
-        if (true) {
-            return Result.success("题目删除成功");
-        } else {
-            return Result.error("题目删除失败");
-        }
+            @Parameter(description = "题目ID") @PathVariable("id") Long id) {
+        questionService.removeQuestion(id);
+        log.info("id={}的题目删除成功", id);
+        return Result.success("题目删除成功");
     }
     
     /**
