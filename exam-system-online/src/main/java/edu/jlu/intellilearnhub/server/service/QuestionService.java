@@ -1,7 +1,9 @@
 package edu.jlu.intellilearnhub.server.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.jlu.intellilearnhub.server.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.jlu.intellilearnhub.server.vo.QuestionQueryVo;
 
 import java.util.List;
 
@@ -24,4 +26,5 @@ import java.util.List;
 public interface QuestionService extends IService<Question> {
 
 
-} 
+    void listQuestion(Page<Question> questionPage, QuestionQueryVo questionQueryVo);
+}
