@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -72,5 +73,27 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             question.setAnswer(questionIdToQuestionAnswer.getOrDefault(question.getId(), null));
             question.setChoices(questionIdToQuestionChoices.getOrDefault(question.getId(), null));
         });
+    }
+
+    @Override
+    public Question getQuestionById(Long id) {
+        Question question = getById(id);
+        if (question == null) {
+            return null;
+        }
+        List<QuestionChoice> questionChoices = Collections.emptyList();
+        if ("CHOICE".equals(question.getType())) {
+             questionChoices = questionChoiceMapper.selectList(new LambdaQueryWrapper<QuestionChoice>()
+                    .eq(QuestionChoice::getQuestionId, id)
+                    .orderByAsc(QuestionChoice::getSort)
+            );
+        }
+        QuestionAnswer questionAnswer = questionAnswerMapper.selectOne(new LambdaQueryWrapper<QuestionAnswer>()
+                .eq(QuestionAnswer::getQuestionId, id)
+                .last("limit 1")
+        );
+        question.setChoices(questionChoices);
+        question.setAnswer(questionAnswer);
+        return question;
     }
 }

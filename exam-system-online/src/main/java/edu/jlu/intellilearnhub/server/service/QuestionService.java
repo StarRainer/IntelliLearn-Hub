@@ -27,4 +27,6 @@ public interface QuestionService extends IService<Question> {
 
 
     void listQuestion(Page<Question> questionPage, QuestionQueryVo questionQueryVo);
+
+    Question getQuestionById(Long id);
 }

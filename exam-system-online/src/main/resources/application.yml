@@ -24,6 +24,11 @@ intellilearn-hub:
     secret-key: ${MINIO_SECRET_KEY:VsJMojzi9a0LI7lFJMHd5tuOgOl58vioKoWOo1te}
     bucket-name: ${MINIO_BUCKET_NAME:intellilearn-hub}
     endpoint: ${MINIO_ENDPOINT:http://192.168.221.100:9000}
+  thread-pool:
+    core-pool-size: 10
+    maximum-pool-size: 30
+    keep-alive-time: 300
+    queue-capacity: 50
 logging:
   level:
     root: info
