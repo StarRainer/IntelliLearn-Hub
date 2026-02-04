@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.jlu.intellilearnhub.server.common.CacheConstants;
+import edu.jlu.intellilearnhub.server.entity.PaperQuestion;
 import edu.jlu.intellilearnhub.server.entity.Question;
 import edu.jlu.intellilearnhub.server.entity.QuestionAnswer;
 import edu.jlu.intellilearnhub.server.entity.QuestionChoice;
 import edu.jlu.intellilearnhub.server.exception.CommonException;
+import edu.jlu.intellilearnhub.server.mapper.PaperQuestionMapper;
 import edu.jlu.intellilearnhub.server.mapper.QuestionAnswerMapper;
 import edu.jlu.intellilearnhub.server.mapper.QuestionChoiceMapper;
 import edu.jlu.intellilearnhub.server.mapper.QuestionMapper;
@@ -48,6 +50,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private ThreadPoolExecutor threadPoolExecutor;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private PaperQuestionMapper paperQuestionMapper;
 
 
     @Override
@@ -218,6 +222,14 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void removeQuestion(Long id) {
-
+        Long count = paperQuestionMapper.selectCount(new LambdaQueryWrapper<PaperQuestion>()
+                .eq(PaperQuestion::getQuestionId, id)
+        );
+        if (count > 0) {
+            throw new CommonException("删除失败，id为%s的试题正在被%s份试卷引用".formatted(id, count));
+        }
+        removeById(id);
+        questionChoiceMapper.delete(new LambdaUpdateWrapper<QuestionChoice>().eq(QuestionChoice::getQuestionId, id));
+        questionAnswerMapper.delete(new LambdaUpdateWrapper<QuestionAnswer>().eq(QuestionAnswer::getQuestionId, id));
     }
 }
