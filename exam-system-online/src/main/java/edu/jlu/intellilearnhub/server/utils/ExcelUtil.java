@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,7 +16,10 @@ import java.util.List;
  * Excel文件处理工具类
  * 用于解析题目导入的Excel文件
  */
-public class ExcelUtil {
+public final class ExcelUtil {
+    private ExcelUtil() {
+
+    }
     
     /**
      * 解析Excel文件并转换为题目导入DTO列表
@@ -28,13 +32,9 @@ public class ExcelUtil {
      * @throws IOException 文件读取异常
      */
     public static List<QuestionImportVo> parseExcel(MultipartFile file) throws IOException {
-        List<QuestionImportVo> questions = new ArrayList<>();
-        
         // 获取文件输入流
-        InputStream inputStream = file.getInputStream();
         Workbook workbook = null;
-        
-        try {
+        try (InputStream inputStream = file.getInputStream()) {
             // 根据文件扩展名选择对应的工作簿类型
             String fileName = file.getOriginalFilename();
             if (fileName != null && fileName.endsWith(".xlsx")) {
@@ -42,10 +42,9 @@ public class ExcelUtil {
             } else {
                 workbook = new HSSFWorkbook(inputStream); // Excel 97-2003
             }
-            
+            List<QuestionImportVo> questions = new ArrayList<>();
             // 获取第一个工作表
             Sheet sheet = workbook.getSheetAt(0);
-            
             // 从第二行开始读取数据（第一行是标题）
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
@@ -115,15 +114,12 @@ public class ExcelUtil {
                     questions.add(question);
                 }
             }
-            
+            return questions;
         } finally {
             if (workbook != null) {
                 workbook.close();
             }
-            inputStream.close();
         }
-        
-        return questions;
     }
     
     /**
@@ -159,43 +155,8 @@ public class ExcelUtil {
      * 生成Excel模板文件的字节数组
      * @return Excel模板文件的字节数组
      */
-    public static byte[] generateTemplate() throws IOException {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("题目导入模板");
-        
-        // 创建标题行
-        Row headerRow = sheet.createRow(0);
-        String[] headers = {
-            "题目内容", "题目类型", "是否多选", "分类ID", "难度", "分值",
-            "选项A", "选项B", "选项C", "选项D", "正确答案", "解析"
-        };
-        
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(headers[i]);
-        }
-        
-        // 创建示例数据行
-        Row exampleRow = sheet.createRow(1);
-        exampleRow.createCell(0).setCellValue("以下哪个是Spring框架的核心特性？");
-        exampleRow.createCell(1).setCellValue("CHOICE");
-        exampleRow.createCell(2).setCellValue("否");
-        exampleRow.createCell(3).setCellValue("1");
-        exampleRow.createCell(4).setCellValue("MEDIUM");
-        exampleRow.createCell(5).setCellValue("5");
-        exampleRow.createCell(6).setCellValue("依赖注入");
-        exampleRow.createCell(7).setCellValue("面向切面编程");
-        exampleRow.createCell(8).setCellValue("事务管理");
-        exampleRow.createCell(9).setCellValue("以上都是");
-        exampleRow.createCell(10).setCellValue("D");
-        exampleRow.createCell(11).setCellValue("Spring框架的核心特性包括依赖注入、面向切面编程和事务管理等。");
-        
-        // 自动调整列宽
-        for (int i = 0; i < headers.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-        
-        try (java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+    public static byte[] generateTemplate(Workbook workbook) throws IOException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             workbook.write(out);
             workbook.close();
             return out.toByteArray();

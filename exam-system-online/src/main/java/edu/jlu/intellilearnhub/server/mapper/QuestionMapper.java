@@ -1,9 +1,11 @@
 package edu.jlu.intellilearnhub.server.mapper;
 
 
-import edu.jlu.intellilearnhub.server.entity.Question;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
+import edu.jlu.intellilearnhub.server.dto.QuestionDto;
+import edu.jlu.intellilearnhub.server.entity.Question;
+
+import java.util.List;
 
 /**
  * 题目Mapper接口
@@ -11,4 +13,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 public interface QuestionMapper extends BaseMapper<Question> {
 
-} 
+    List<QuestionDto> countByCategoryId();
+}

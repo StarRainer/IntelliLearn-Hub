@@ -1,0 +1,23 @@
+请为我生成{{count}}道以“{{topic}}”为主题的题目。
+本次生成的题目要求：
+- 题目类型：{{types}} (补充说明："CHOICE"是指选择题，"JUDGE"是指判断题，"TEXT"是指简答题")
+- 题目难度：{{difficulty}}
+- 分类ID：必须只能是{{categoryId}}
+- 对于选择题，是否允许包含多选题：{{includeMultiple}}
+- 额外的生成要求和说明：{{requirements}}
+
+严格的出题规范：
+- 【选择题】：
+  - 必须包含 choices 列表。
+  - 单选题固定 4 个选项。
+  - 多选题必须有 2 个或以上的正确选项。
+  - answer 字段留空，通过 choices 里的 isCorrect 字段标记答案。
+- 【判断题】：
+  - 必须设置 answer 字段为 "TRUE" 或 "FALSE"。
+  - choices 列表留空。
+- 【简答题】：
+  - 必须提供参考答案填入 answer 字段。
+  - 必须提取 1-5 个评分关键词填入 keywords 字段。
+  - choices 列表留空。
+
+请严格按照 QuestionImportVo 的 JSON 格式数组返回数据，不要包含任何 Markdown 代码块标记。

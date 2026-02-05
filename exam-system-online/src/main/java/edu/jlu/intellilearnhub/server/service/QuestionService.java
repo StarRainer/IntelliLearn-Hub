@@ -1,8 +1,13 @@
 package edu.jlu.intellilearnhub.server.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.jlu.intellilearnhub.server.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.jlu.intellilearnhub.server.vo.QuestionImportVo;
+import edu.jlu.intellilearnhub.server.vo.QuestionQueryVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -24,4 +29,15 @@ import java.util.List;
 public interface QuestionService extends IService<Question> {
 
 
-} 
+    void listQuestion(Page<Question> questionPage, QuestionQueryVo questionQueryVo);
+
+    Question getQuestionById(Long id);
+
+    void saveQuestion(Question question);
+
+    void updateQuestion(Question question);
+
+    void removeQuestion(Long id);
+
+    List<Question> listPopularQuestions(Integer size);
+}

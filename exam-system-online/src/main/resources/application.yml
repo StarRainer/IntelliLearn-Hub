@@ -24,7 +24,23 @@ intellilearn-hub:
     secret-key: ${MINIO_SECRET_KEY:VsJMojzi9a0LI7lFJMHd5tuOgOl58vioKoWOo1te}
     bucket-name: ${MINIO_BUCKET_NAME:intellilearn-hub}
     endpoint: ${MINIO_ENDPOINT:http://192.168.221.100:9000}
+  thread-pool:
+    core-pool-size: 10
+    maximum-pool-size: 30
+    keep-alive-time: 300
+    queue-capacity: 50
 logging:
   level:
     root: info
     edu.jlu.intellilearnhub.server: debug
+langchain4j:
+  open-ai:
+    chat-model:
+      api-key: ${OPENAI_API_KEY:123456789abcdefg}
+      model-name: ${OPENAI_MODEL_NAME:qwen3-max}
+      base-url: ${OPENAI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+      log-requests: true
+      log-responses: true
+      supported-capabilities: response_format_json_schema
+      strict-json-schema: true
+      max-tokens: 4096
