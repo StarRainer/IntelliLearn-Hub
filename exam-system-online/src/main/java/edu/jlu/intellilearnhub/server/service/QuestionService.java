@@ -40,8 +40,4 @@ public interface QuestionService extends IService<Question> {
     void removeQuestion(Long id);
 
     List<Question> listPopularQuestions(Integer size);
-
-    byte[] getDefaultExcelTemplate() throws IOException;
-
-    List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException;
 }

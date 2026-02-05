@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -266,55 +267,5 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<Question> result = questionIds.stream().map(questionIdToQuestion::get).toList();
         fillQuestionWithChoiceAndAnswer(result);
         return result;
-    }
-
-    @Override
-    public byte[] getDefaultExcelTemplate() throws IOException {
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("题目导入模板");
-            String[] headers = {
-                    "题目内容", "题目类型", "是否多选", "分类ID", "难度", "分值",
-                    "选项A", "选项B", "选项C", "选项D", "正确答案", "解析"
-            };
-            Row headerRow = sheet.createRow(0);
-            for (int i = 0; i < headers.length; i++) {
-                headerRow.createCell(i).setCellValue(headers[i]);
-            }
-            Row exampleRow = sheet.createRow(1);
-            exampleRow.createCell(0).setCellValue("以下哪个是Spring框架的核心特性？");
-            exampleRow.createCell(1).setCellValue("CHOICE");
-            exampleRow.createCell(2).setCellValue("否");
-            exampleRow.createCell(3).setCellValue("1");
-            exampleRow.createCell(4).setCellValue("MEDIUM");
-            exampleRow.createCell(5).setCellValue("5");
-            exampleRow.createCell(6).setCellValue("依赖注入");
-            exampleRow.createCell(7).setCellValue("面向切面编程");
-            exampleRow.createCell(8).setCellValue("事务管理");
-            exampleRow.createCell(9).setCellValue("以上都是");
-            exampleRow.createCell(10).setCellValue("D");
-            exampleRow.createCell(11).setCellValue("Spring框架的核心特性包括依赖注入、面向切面编程和事务管理等。");
-
-            // 自动调整列宽
-            for (int i = 0; i < headers.length; i++) {
-                sheet.autoSizeColumn(i);
-            }
-            return ExcelUtil.generateTemplate(workbook);
-        }
-    }
-
-    @Override
-    public List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new CommonException("预览失败，上传的表格文件不能为空");
-        }
-
-        String fileName = file.getOriginalFilename();
-        if (fileName == null) {
-            throw new CommonException("预览失败，上传的表格文件应该有文件名");
-        }
-        if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
-            throw new CommonException("预览失败，上传的表格文件的后缀只能为.xlsx或者.xls");
-        }
-        return ExcelUtil.parseExcel(file);
     }
 }
