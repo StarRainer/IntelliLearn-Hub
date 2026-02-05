@@ -3,8 +3,11 @@ package edu.jlu.intellilearnhub.server.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.jlu.intellilearnhub.server.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.jlu.intellilearnhub.server.vo.QuestionImportVo;
 import edu.jlu.intellilearnhub.server.vo.QuestionQueryVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -37,4 +40,8 @@ public interface QuestionService extends IService<Question> {
     void removeQuestion(Long id);
 
     List<Question> listPopularQuestions(Integer size);
+
+    byte[] getDefaultExcelTemplate() throws IOException;
+
+    List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException;
 }
