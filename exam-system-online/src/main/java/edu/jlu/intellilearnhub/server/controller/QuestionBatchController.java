@@ -2,6 +2,7 @@ package edu.jlu.intellilearnhub.server.controller;
 
 
 import edu.jlu.intellilearnhub.server.common.Result;
+import edu.jlu.intellilearnhub.server.service.AIService;
 import edu.jlu.intellilearnhub.server.service.QuestionBatchService;
 import edu.jlu.intellilearnhub.server.service.QuestionService;
 import edu.jlu.intellilearnhub.server.vo.AiGenerateRequestVo;
@@ -71,8 +72,9 @@ public class QuestionBatchController {
     @Operation(summary = "AI智能生成题目", description = "使用AI技术根据指定主题和要求智能生成题目，支持预览后再决定是否导入")  // API描述
     public Result<List<QuestionImportVo>> generateQuestionsByAi(
             @RequestBody @Validated AiGenerateRequestVo request) {
-
-       return Result.error("AI生成题目失败");
+        List<QuestionImportVo> questionImportVos = questionBatchService.generateQuestionByAi(request);
+        log.info("AI生成的题目为：questionImportVos {}", questionImportVos);
+        return Result.success(questionImportVos);
     }
     
     /**

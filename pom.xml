@@ -31,7 +31,7 @@
         <redisson.version>3.43.0</redisson.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
-        <langchain4j-open-ai.version>1.11.0-beta19</langchain4j-open-ai.version>
+        <langchain4j.version>1.11.0-beta19</langchain4j.version>
     </properties>
 
     <dependencyManagement>
@@ -118,10 +118,15 @@
 
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
-                <version>${langchain4j-open-ai.version}</version>
+                <artifactId>langchain4j-spring-boot-starter</artifactId>
+                <version>${langchain4j.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

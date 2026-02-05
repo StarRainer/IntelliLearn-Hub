@@ -1,5 +1,6 @@
 package edu.jlu.intellilearnhub.server.service;
 
+import edu.jlu.intellilearnhub.server.vo.AiGenerateRequestVo;
 import edu.jlu.intellilearnhub.server.vo.QuestionImportVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,4 +13,6 @@ public interface QuestionBatchService {
     List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException;
 
     String importQuestions(List<QuestionImportVo> questionImportVos);
+
+    List<QuestionImportVo> generateQuestionByAi(AiGenerateRequestVo request);
 }

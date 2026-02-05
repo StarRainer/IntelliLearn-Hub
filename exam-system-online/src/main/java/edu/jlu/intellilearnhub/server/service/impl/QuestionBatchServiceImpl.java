@@ -1,12 +1,16 @@
 package edu.jlu.intellilearnhub.server.service.impl;
 
+import edu.jlu.intellilearnhub.server.entity.Category;
 import edu.jlu.intellilearnhub.server.entity.Question;
 import edu.jlu.intellilearnhub.server.entity.QuestionAnswer;
 import edu.jlu.intellilearnhub.server.entity.QuestionChoice;
 import edu.jlu.intellilearnhub.server.exception.CommonException;
+import edu.jlu.intellilearnhub.server.mapper.CategoryMapper;
+import edu.jlu.intellilearnhub.server.service.AIService;
 import edu.jlu.intellilearnhub.server.service.QuestionBatchService;
 import edu.jlu.intellilearnhub.server.service.QuestionService;
 import edu.jlu.intellilearnhub.server.utils.ExcelUtil;
+import edu.jlu.intellilearnhub.server.vo.AiGenerateRequestVo;
 import edu.jlu.intellilearnhub.server.vo.QuestionImportVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -22,12 +26,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class QuestionBatchServiceImpl implements QuestionBatchService {
     @Autowired
     private QuestionService questionService;
+
+    @Autowired
+    private AIService aiService;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     @Override
     public byte[] getDefaultExcelTemplate() throws IOException {
@@ -114,5 +124,24 @@ public class QuestionBatchServiceImpl implements QuestionBatchService {
             }
         }
         return "题目批量导入结束，%s条数据一共成功导入了%s条".formatted(questionImportVos.size(), successNumber);
+    }
+
+    @Override
+    public List<QuestionImportVo> generateQuestionByAi(AiGenerateRequestVo request) {
+        Category category = categoryMapper.selectById(request.getCategoryId());
+        return aiService.generateImportQuestion(
+                request.getTopic(),
+                request.getCount(),
+                request.getTypes(),
+                request.getDifficulty(),
+                request.getCategoryId(),
+                request.getIncludeMultiple(),
+                request.getRequirements()
+        )
+        .stream()
+        .map(questionImportVo -> {
+          questionImportVo.setCategoryName(category.getName());
+          return questionImportVo;
+        }).toList();
     }
 }
