@@ -7,6 +7,7 @@ import edu.jlu.intellilearnhub.server.service.VideoCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +17,11 @@ import java.util.List;
  * 视频分类控制器
  * 处理视频分类管理相关的HTTP请求
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/video-categories")
 @Tag(name = "视频分类管理", description = "视频分类相关操作，包括分类的增删改查、树形结构管理等功能")
+@CrossOrigin
 public class VideoCategoryController {
 
     @Autowired
@@ -62,7 +65,7 @@ public class VideoCategoryController {
     @GetMapping("/children/{parentId}")
     @Operation(summary = "获取子分类", description = "根据父级分类ID获取其下的子分类列表")
     public Result<List<VideoCategory>> getChildCategories(
-            @Parameter(description = "父级分类ID") @PathVariable Long parentId) {
+            @Parameter(description = "父级分类ID") @PathVariable("parentId") Long parentId) {
         return Result.success(videoCategoryService.getChildCategories(parentId));
     }
 
@@ -74,7 +77,7 @@ public class VideoCategoryController {
     @GetMapping("/{id}")
     @Operation(summary = "获取分类详情", description = "根据分类ID获取详细信息，包含视频数量和父级分类名称")
     public Result<VideoCategory> getCategoryById(
-            @Parameter(description = "分类ID") @PathVariable Long id) {
+            @Parameter(description = "分类ID") @PathVariable("id") Long id) {
         return Result.success(videoCategoryService.getCategoryById(id));
     }
 
@@ -110,7 +113,7 @@ public class VideoCategoryController {
     @DeleteMapping("/{id}")
     @Operation(summary = "删除分类", description = "删除指定的视频分类，注意：删除前需确保分类下没有视频")
     public Result<Void> deleteCategory(
-            @Parameter(description = "分类ID") @PathVariable Long id) {
+            @Parameter(description = "分类ID") @PathVariable("id") Long id) {
         videoCategoryService.deleteCategory(id);
         return Result.success(null);
     }

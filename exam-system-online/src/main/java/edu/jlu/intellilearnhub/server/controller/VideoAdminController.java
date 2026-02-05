@@ -20,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/videos")
 @Tag(name = "视频管理(管理端)", description = "管理端视频相关操作，包括视频管理、审核、统计等功能")
+@CrossOrigin
 public class VideoAdminController {
 
     @Autowired
@@ -37,11 +38,11 @@ public class VideoAdminController {
     @GetMapping
     @Operation(summary = "获取视频列表(管理端)", description = "管理端分页获取视频列表，支持多条件筛选")
     public Result<IPage<Video>> getVideosForAdmin(
-            @Parameter(description = "页码，默认1") @RequestParam(defaultValue = "1") Integer page,
-            @Parameter(description = "每页大小，默认10") @RequestParam(defaultValue = "10") Integer size,
-            @Parameter(description = "状态：0-待审核，1-已发布，2-已拒绝，3-已下架") @RequestParam(required = false) Integer status,
-            @Parameter(description = "上传者类型：1-用户投稿，2-管理员上传") @RequestParam(required = false) Integer uploaderType,
-            @Parameter(description = "搜索关键字") @RequestParam(required = false) String keyword) {
+            @Parameter(description = "页码，默认1") @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "每页大小，默认10") @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @Parameter(description = "状态：0-待审核，1-已发布，2-已拒绝，3-已下架") @RequestParam(value = "status", required = false) Integer status,
+            @Parameter(description = "上传者类型：1-用户投稿，2-管理员上传") @RequestParam(value = "uploaderType", required = false) Integer uploaderType,
+            @Parameter(description = "搜索关键字") @RequestParam(value = "keyword", required = false) String keyword) {
         IPage<Video> result = videoService.getVideosForAdmin(page, size, status, uploaderType, keyword);
         return Result.success(result);
     }
@@ -61,14 +62,14 @@ public class VideoAdminController {
     @PostMapping("/upload")
     @Operation(summary = "管理员上传视频", description = "管理员直接上传视频，无需审核直接发布")
     public Result<Map<String, Object>> uploadVideoByAdmin(
-            @Parameter(description = "视频标题") @RequestParam String title,
-            @Parameter(description = "视频描述") @RequestParam(required = false) String description,
-            @Parameter(description = "分类ID") @RequestParam Long categoryId,
-            @Parameter(description = "标签") @RequestParam(required = false) String tags,
-            @Parameter(description = "上传者名称") @RequestParam String uploaderName,
-            @Parameter(description = "视频时长（秒）") @RequestParam(required = false) Integer duration,
-            @Parameter(description = "视频文件") @RequestParam MultipartFile videoFile,
-            @Parameter(description = "封面文件") @RequestParam(required = false) MultipartFile coverFile) {
+            @Parameter(description = "视频标题") @RequestParam("title") String title,
+            @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
+            @Parameter(description = "分类ID") @RequestParam("categoryId") Long categoryId,
+            @Parameter(description = "标签") @RequestParam(value = "tags", required = false) String tags,
+            @Parameter(description = "上传者名称") @RequestParam("uploaderName") String uploaderName,
+            @Parameter(description = "视频时长（秒）") @RequestParam(value = "duration", required = false) Integer duration,
+            @Parameter(description = "视频文件") @RequestParam("videoFile") MultipartFile videoFile,
+            @Parameter(description = "封面文件") @RequestParam(value = "coverFile", required = false) MultipartFile coverFile) {
         
         // 构建视频对象
         Video video = new Video();
@@ -96,9 +97,9 @@ public class VideoAdminController {
     @PostMapping("/{videoId}/audit")
     @Operation(summary = "审核视频", description = "管理员审核用户投稿的视频，可以通过或拒绝")
     public Result<Void> auditVideo(
-            @Parameter(description = "视频ID") @PathVariable Long videoId,
-            @Parameter(description = "审核状态：1-通过，2-拒绝") @RequestParam Integer status,
-            @Parameter(description = "审核原因（拒绝时必填）") @RequestParam(required = false) String reason) {
+            @Parameter(description = "视频ID") @PathVariable("videoId") Long videoId,
+            @Parameter(description = "审核状态：1-通过，2-拒绝") @RequestParam("status") Integer status,
+            @Parameter(description = "审核原因（拒绝时必填）") @RequestParam(value = "reason", required = false) String reason) {
         
         // TODO: 从当前登录用户获取管理员ID，这里暂时使用固定值
         Long adminId = 1L;
@@ -115,7 +116,7 @@ public class VideoAdminController {
     @PostMapping("/{videoId}/offline")
     @Operation(summary = "下架视频", description = "管理员将已发布的视频下架")
     public Result<Void> offlineVideo(
-            @Parameter(description = "视频ID") @PathVariable Long videoId) {
+            @Parameter(description = "视频ID") @PathVariable("videoId") Long videoId) {
         
         // TODO: 从当前登录用户获取管理员ID，这里暂时使用固定值
         Long adminId = 1L;
@@ -132,7 +133,7 @@ public class VideoAdminController {
     @DeleteMapping("/{videoId}")
     @Operation(summary = "删除视频", description = "管理员删除视频（危险操作，会删除所有相关数据）")
     public Result<Void> deleteVideo(
-            @Parameter(description = "视频ID") @PathVariable Long videoId) {
+            @Parameter(description = "视频ID") @PathVariable("videoId") Long videoId) {
         
         videoService.deleteVideo(videoId);
         return Result.success(null);
@@ -158,8 +159,8 @@ public class VideoAdminController {
     @GetMapping("/{videoId}/stats")
     @Operation(summary = "获取视频详细统计", description = "获取指定视频的详细统计数据，包括观看、点赞等趋势")
     public Result<Map<String, Object>> getVideoDetailStats(
-            @Parameter(description = "视频ID") @PathVariable Long videoId,
-            @Parameter(description = "统计天数，默认30天") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "视频ID") @PathVariable("videoId") Long videoId,
+            @Parameter(description = "统计天数，默认30天") @RequestParam(value = "days", defaultValue = "30") Integer days) {
         
         Map<String, Object> stats = videoService.getVideoDetailStats(videoId, days);
         return Result.success(stats);
