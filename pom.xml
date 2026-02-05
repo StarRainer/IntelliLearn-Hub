@@ -19,7 +19,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.3.5</spring-boot.version>
+        <spring-boot.version>3.4.0</spring-boot.version>
         <mybatis-plus.version>3.5.15</mybatis-plus.version>
         <mysql.version>9.5.0</mysql.version>
         <knife4j.version>4.4.0</knife4j.version>
@@ -31,6 +31,7 @@
         <redisson.version>3.43.0</redisson.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+        <langchain4j-open-ai.version>1.11.0-beta19</langchain4j-open-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -113,6 +114,12 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+                <version>${langchain4j-open-ai.version}</version>
             </dependency>
 
         </dependencies>
