@@ -3,9 +3,12 @@ package edu.jlu.intellilearnhub.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import edu.jlu.intellilearnhub.server.common.BusinessConstants;
+import edu.jlu.intellilearnhub.server.entity.ExamRecord;
 import edu.jlu.intellilearnhub.server.entity.Paper;
 import edu.jlu.intellilearnhub.server.entity.PaperQuestion;
 import edu.jlu.intellilearnhub.server.entity.Question;
+import edu.jlu.intellilearnhub.server.exception.CommonException;
+import edu.jlu.intellilearnhub.server.mapper.ExamRecordMapper;
 import edu.jlu.intellilearnhub.server.mapper.PaperMapper;
 import edu.jlu.intellilearnhub.server.mapper.PaperQuestionMapper;
 import edu.jlu.intellilearnhub.server.mapper.QuestionMapper;
@@ -33,6 +36,10 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 
     @Autowired
     private PaperQuestionService paperQuestionService;
+    @Autowired
+    private ExamRecordMapper examRecordMapper;
+    @Autowired
+    private PaperQuestionMapper paperQuestionMapper;
 
     @Override
     public List<Paper> listPapers(String name, String status) {
@@ -48,7 +55,7 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
         Paper paper = new Paper();
         BeanUtils.copyProperties(paperVo, paper);
         paper.setStatus(BusinessConstants.PaperStatus.DRAFT.getStatus());
-        if (ObjectUtils.isEmpty(paper.getQuestions())) {
+        if (ObjectUtils.isEmpty(paperVo.getQuestions())) {
             paper.setTotalScore(BigDecimal.ZERO);
             paper.setQuestionCount(0);
             save(paper);
@@ -68,5 +75,30 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
         }).toList();
         paperQuestionService.saveBatch(paperQuestions);
         return paper;
+    }
+
+    @Override
+    public Paper getPaperById(Long id) {
+        Paper paper = getById(id);
+        return paper;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deletePaperById(Long id) {
+        Paper paper = getById(id);
+        if (BusinessConstants.PaperStatus.PUBLISHED.getStatus().equals(paper.getStatus())) {
+            throw new CommonException("id=%s的试卷处于发布状态，禁止删除".formatted(id));
+        }
+        Long count = examRecordMapper.selectCount(new LambdaQueryWrapper<ExamRecord>()
+                .eq(ExamRecord::getExamId, id)
+        );
+        if (count > 0) {
+            throw new CommonException("id=%s的试卷已经关联了%s条考试记录，无法直接删除".formatted(id, count));
+        }
+        removeById(id);
+        examRecordMapper.delete(new LambdaQueryWrapper<ExamRecord>()
+                .eq(ExamRecord::getExamId, id)
+        );
     }
 }

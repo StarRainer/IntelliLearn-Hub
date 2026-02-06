@@ -64,7 +64,7 @@ public class PaperController {
     @PutMapping("/{id}")  // 处理PUT请求
     @Operation(summary = "更新试卷信息", description = "更新试卷的基本信息和题目配置")  // API描述
     public Result<Paper> updatePaper(
-            @Parameter(description = "试卷ID") @PathVariable Integer id, 
+            @Parameter(description = "试卷ID") @PathVariable Long id, 
             @RequestBody PaperVo paperVo) {
         return Result.success(null, "试卷更新成功");
     }
@@ -85,8 +85,10 @@ public class PaperController {
      */
     @GetMapping("/{id}")  // 处理GET请求
     @Operation(summary = "获取试卷详情", description = "获取试卷的详细信息，包括试卷基本信息和包含的所有题目")  // API描述
-    public Result<Paper> getPaperById(@Parameter(description = "试卷ID") @PathVariable Integer id) {
-        return Result.success(null);
+    public Result<Paper> getPaperById(@Parameter(description = "试卷ID") @PathVariable("id") Long id) {
+        Paper paper = paperService.getPaperById(id);
+        log.info("试卷详情查询成功：paper={}", paper);
+        return Result.success(paper);
     }
 
     /**
@@ -98,7 +100,7 @@ public class PaperController {
     @PostMapping("/{id}/status")  // 处理POST请求
     @Operation(summary = "更新试卷状态", description = "修改试卷状态：发布试卷供学生考试或停止试卷禁止考试")  // API描述
     public Result<Void> updatePaperStatus(
-            @Parameter(description = "试卷ID") @PathVariable Integer id, 
+            @Parameter(description = "试卷ID") @PathVariable Long id, 
             @Parameter(description = "新的状态，可选值：PUBLISHED/STOPPED") @RequestParam String status) {
         return Result.success(null, "状态更新成功");
     }
@@ -110,9 +112,9 @@ public class PaperController {
      */
     @DeleteMapping("/{id}")  // 处理DELETE请求
     @Operation(summary = "删除试卷", description = "删除指定的试卷，注意：已发布的试卷不能删除")  // API描述
-    public Result<Void> deletePaper(@Parameter(description = "试卷ID") @PathVariable Integer id) {
-        // 检查试卷是否存在  // 验证试卷存在性
-
-        return Result.error("试卷删除失败");
+    public Result<Void> deletePaper(@Parameter(description = "试卷ID") @PathVariable("id") Long id) {
+        paperService.deletePaperById(id);
+        log.info("试卷删除成功：id={}", id);
+        return Result.success("删除试卷成功");
     }
 } 

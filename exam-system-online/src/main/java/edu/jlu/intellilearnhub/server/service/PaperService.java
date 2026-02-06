@@ -14,4 +14,8 @@ public interface PaperService extends IService<Paper> {
     List<Paper> listPapers(String name, String status);
 
     Paper createPaper(PaperVo paperVo);
+
+    Paper getPaperById(Long id);
+
+    void deletePaperById(Long id);
 }
