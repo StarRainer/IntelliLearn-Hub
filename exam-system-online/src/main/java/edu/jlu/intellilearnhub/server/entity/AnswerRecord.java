@@ -21,11 +21,11 @@ public class AnswerRecord extends BaseEntity {
 
     @Schema(description = "关联的考试记录ID", 
             example = "1")
-    private Integer examRecordId; // 考试记录ID
+    private Long examRecordId; // 考试记录ID
 
     @Schema(description = "题目ID", 
             example = "5")
-    private Integer questionId; // 题目ID
+    private Long questionId; // 题目ID
 
     @Schema(description = "学生提交的答案", 
             example = "A")
@@ -45,7 +45,7 @@ public class AnswerRecord extends BaseEntity {
     private String aiCorrection; // AI批改意见
 
 
-    public AnswerRecord(Integer examRecordId, Integer questionId, String userAnswer) {
+    public AnswerRecord(Long examRecordId, Long questionId, String userAnswer) {
         this.examRecordId = examRecordId;
         this.questionId = questionId;
         this.userAnswer = userAnswer;

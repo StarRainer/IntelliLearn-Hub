@@ -23,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/videos")
 @Tag(name = "视频管理(用户端)", description = "用户端视频相关操作，包括视频浏览、观看、点赞、投稿等功能")
+@CrossOrigin
 public class VideoController {
 
     @Autowired
@@ -40,10 +41,10 @@ public class VideoController {
     @GetMapping
     @Operation(summary = "获取视频列表", description = "分页获取已发布的视频列表，支持按分类和关键字筛选")
     public Result<IPage<Video>> getVideos(
-            @Parameter(description = "页码，默认1") @RequestParam(defaultValue = "1") Integer page,
-            @Parameter(description = "每页大小，默认10") @RequestParam(defaultValue = "10") Integer size,
-            @Parameter(description = "分类ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "搜索关键字") @RequestParam(required = false) String keyword,
+            @Parameter(description = "页码，默认1") @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "每页大小，默认10") @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @Parameter(description = "分类ID") @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @Parameter(description = "搜索关键字") @RequestParam(value = "keyword", required = false) String keyword,
             HttpServletRequest request) {
         IPage<Video> result = videoService.getPublishedVideos(page, size, categoryId, keyword, request);
         return Result.success(result);
@@ -58,7 +59,7 @@ public class VideoController {
     @GetMapping("/{id}")
     @Operation(summary = "获取视频详情", description = "根据视频ID获取详细信息，包含用户点赞状态")
     public Result<Video> getVideoDetail(
-            @Parameter(description = "视频ID") @PathVariable Long id,
+            @Parameter(description = "视频ID") @PathVariable("id") Long id,
             HttpServletRequest request) {
         Video video = videoService.getVideoDetail(id, request);
         return Result.success(video);
@@ -72,7 +73,7 @@ public class VideoController {
     @GetMapping("/popular")
     @Operation(summary = "获取热门视频", description = "根据观看次数获取热门视频列表")
     public Result<List<Video>> getPopularVideos(
-            @Parameter(description = "限制数量，默认10") @RequestParam(defaultValue = "10") Integer limit) {
+            @Parameter(description = "限制数量，默认10") @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
         List<Video> videos = videoService.getPopularVideos(limit);
         return Result.success(videos);
     }
@@ -85,7 +86,7 @@ public class VideoController {
     @GetMapping("/latest")
     @Operation(summary = "获取最新视频", description = "根据发布时间获取最新视频列表")
     public Result<List<Video>> getLatestVideos(
-            @Parameter(description = "限制数量，默认10") @RequestParam(defaultValue = "10") Integer limit) {
+            @Parameter(description = "限制数量，默认10") @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
         List<Video> videos = videoService.getLatestVideos(limit);
         return Result.success(videos);
     }
@@ -100,8 +101,8 @@ public class VideoController {
     @PostMapping("/{videoId}/view")
     @Operation(summary = "记录视频观看", description = "记录用户观看视频的行为和时长")
     public Result<Void> recordVideoView(
-            @Parameter(description = "视频ID") @PathVariable Long videoId,
-            @Parameter(description = "观看时长（秒）") @RequestParam Integer viewDuration,
+            @Parameter(description = "视频ID") @PathVariable("videoId") Long videoId,
+            @Parameter(description = "观看时长（秒）") @RequestParam("viewDuration") Integer viewDuration,
             HttpServletRequest request) {
         videoService.recordVideoView(videoId, viewDuration, request);
         return Result.success(null);
@@ -116,7 +117,7 @@ public class VideoController {
     @PostMapping("/{videoId}/like")
     @Operation(summary = "切换点赞状态", description = "切换用户对视频的点赞状态，返回当前状态")
     public Result<Map<String, Object>> toggleVideoLike(
-            @Parameter(description = "视频ID") @PathVariable Long videoId,
+            @Parameter(description = "视频ID") @PathVariable("videoId") Long videoId,
             HttpServletRequest request) {
         boolean isLiked = videoService.toggleVideoLike(videoId, request);
         return Result.success(Map.of(
@@ -140,14 +141,14 @@ public class VideoController {
     @PostMapping("/submit")
     @Operation(summary = "用户投稿视频", description = "用户上传视频进行投稿，需要等待审核")
     public Result<Map<String, Object>> submitVideo(
-            @Parameter(description = "视频标题") @RequestParam String title,
-            @Parameter(description = "视频描述") @RequestParam(required = false) String description,
-            @Parameter(description = "分类ID") @RequestParam Long categoryId,
-            @Parameter(description = "标签") @RequestParam(required = false) String tags,
-            @Parameter(description = "上传者名称") @RequestParam String uploaderName,
-            @Parameter(description = "视频时长（秒）") @RequestParam Integer duration,
-            @Parameter(description = "视频文件") @RequestParam MultipartFile videoFile,
-            @Parameter(description = "封面文件") @RequestParam(required = false) MultipartFile coverFile) {
+            @Parameter(description = "视频标题") @RequestParam("title") String title,
+            @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
+            @Parameter(description = "分类ID") @RequestParam("categroyId") Long categoryId,
+            @Parameter(description = "标签") @RequestParam(value = "tags", required = false) String tags,
+            @Parameter(description = "上传者名称") @RequestParam("uploaderName") String uploaderName,
+            @Parameter(description = "视频时长（秒）") @RequestParam("duration") Integer duration,
+            @Parameter(description = "视频文件") @RequestParam("videoFile") MultipartFile videoFile,
+            @Parameter(description = "封面文件") @RequestParam(value = "coverFile", required = false) MultipartFile coverFile) {
         
         // 构建视频对象
         Video video = new Video();

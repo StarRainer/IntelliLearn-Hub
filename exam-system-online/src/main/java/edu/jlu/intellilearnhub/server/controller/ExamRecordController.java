@@ -2,6 +2,7 @@ package edu.jlu.intellilearnhub.server.controller;
 
 import edu.jlu.intellilearnhub.server.common.Result;
 import edu.jlu.intellilearnhub.server.entity.ExamRecord;
+import edu.jlu.intellilearnhub.server.service.ExamRecordService;
 import edu.jlu.intellilearnhub.server.vo.ExamRankingVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,9 +23,15 @@ import java.util.List;
 @RestController  // REST控制器，返回JSON数据
 @RequestMapping("/api/exam-records")  // 考试记录API路径前缀
 @Tag(name = "考试记录管理", description = "考试记录相关操作，包括记录查询、成绩管理、排行榜展示等功能")  // Swagger API分组
+@CrossOrigin
 public class ExamRecordController {
 
 
+    private final ExamRecordService examRecordService;
+
+    public ExamRecordController(ExamRecordService examRecordService) {
+        this.examRecordService = examRecordService;
+    }
 
     /**
      * 分页查询考试记录
@@ -32,16 +39,18 @@ public class ExamRecordController {
     @GetMapping("/list")  // 处理GET请求
     @Operation(summary = "分页查询考试记录", description = "支持多条件筛选的考试记录分页查询，包括按姓名、状态、时间范围等筛选")  // API描述
     public Result<Page<ExamRecord>> getExamRecords(
-            @Parameter(description = "当前页码，从1开始", example = "1") @RequestParam(defaultValue = "1") Integer page,
-            @Parameter(description = "每页显示数量", example = "20") @RequestParam(defaultValue = "20") Integer size,
-            @Parameter(description = "学生姓名筛选条件") @RequestParam(required = false) String studentName,
-            @Parameter(description = "学号筛选条件") @RequestParam(required = false) String studentNumber,
-            @Parameter(description = "考试状态，0-进行中，1-已完成，2-已批阅") @RequestParam(required = false) Integer status,
-            @Parameter(description = "开始日期，格式：yyyy-MM-dd") @RequestParam(required = false) String startDate,
-            @Parameter(description = "结束日期，格式：yyyy-MM-dd") @RequestParam(required = false) String endDate
+            @Parameter(description = "当前页码，从1开始", example = "1") @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "每页显示数量", example = "20") @RequestParam(value = "size", defaultValue = "20") Integer size,
+            @Parameter(description = "学生姓名筛选条件") @RequestParam(value = "studentName", required = false) String studentName,
+            @Parameter(description = "学号筛选条件") @RequestParam(value = "studentNumber", required = false) String studentNumber,
+            @Parameter(description = "考试状态，0-进行中，1-已完成，2-已批阅") @RequestParam(value = "status", required = false) Integer status,
+            @Parameter(description = "开始日期，格式：yyyy-MM-dd") @RequestParam(value = "startDate", required = false) String startDate,
+            @Parameter(description = "结束日期，格式：yyyy-MM-dd") @RequestParam(value = "endDate", required = false) String endDate
     ) {
-
-        return Result.success(null);
+        Page<ExamRecord> examRecordPage = new Page<>(page, size);
+        examRecordService.pageExamRecords(examRecordPage, studentName, studentNumber, status, startDate, endDate);
+        examRecordService.fixUpdateRecordStatus(examRecordPage);
+        return Result.success(examRecordPage);
     }
 
     /**
@@ -61,7 +70,7 @@ public class ExamRecordController {
     @DeleteMapping("/{id}")  // 处理DELETE请求
     @Operation(summary = "删除考试记录", description = "根据ID删除指定的考试记录")  // API描述
     public Result<Void> deleteExamRecord(
-            @Parameter(description = "考试记录ID") @PathVariable Integer id) {
+            @Parameter(description = "考试记录ID") @PathVariable("id") Long id) {
 
          return Result.error("删除失败");
     }

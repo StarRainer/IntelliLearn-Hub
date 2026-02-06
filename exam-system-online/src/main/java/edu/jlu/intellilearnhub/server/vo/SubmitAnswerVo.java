@@ -17,7 +17,7 @@ public class SubmitAnswerVo implements Serializable {
             example = "1", 
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "题目ID不能为空")
-    private Integer questionId; // 题目ID
+    private Long questionId; // 题目ID
 
     @Schema(description = "用户提交的答案", 
             example = "A", 

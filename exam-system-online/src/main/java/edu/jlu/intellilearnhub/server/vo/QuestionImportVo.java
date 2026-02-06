@@ -1,5 +1,6 @@
 package edu.jlu.intellilearnhub.server.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.langchain4j.model.output.structured.Description;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -51,6 +52,7 @@ public class QuestionImportVo {
             example = "5")
     private Integer score; // 默认分值
 
+    @JsonProperty(required = true)
     @Description("这个字段填写题目的答案解析，语言表述尽量简洁凝练，但要确保能让学生理解，每道题的解析字数不宜超过200字")
     @Schema(description = "题目解析说明", 
             example = "Java是面向对象编程语言，支持封装、继承、多态三大特性...")
