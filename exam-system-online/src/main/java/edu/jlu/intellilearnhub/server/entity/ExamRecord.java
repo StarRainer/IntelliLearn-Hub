@@ -22,7 +22,7 @@ public class ExamRecord extends BaseEntity {
 
     @Schema(description = "试卷ID，关联的考试试卷", 
             example = "1")
-    private Integer examId; // 试卷ID
+    private Long examId; // 试卷ID
 
     @Schema(description = "考生姓名", 
             example = "张三")

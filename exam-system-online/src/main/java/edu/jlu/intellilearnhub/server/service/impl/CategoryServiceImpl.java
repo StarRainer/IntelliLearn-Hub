@@ -33,6 +33,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public List<Category> listCategories() {
         List<Category> categories = list(new LambdaQueryWrapper<Category>()
                 .orderByAsc(Category::getSort)
+                .orderByAsc(Category::getId)
         );
         Map<Long, Long> idToCount = questionMapper.countByCategoryId().stream()
                 .collect(Collectors.toMap(QuestionDto::getCategoryId, QuestionDto::getCount));

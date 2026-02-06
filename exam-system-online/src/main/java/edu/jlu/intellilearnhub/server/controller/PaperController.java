@@ -64,9 +64,11 @@ public class PaperController {
     @PutMapping("/{id}")  // 处理PUT请求
     @Operation(summary = "更新试卷信息", description = "更新试卷的基本信息和题目配置")  // API描述
     public Result<Paper> updatePaper(
-            @Parameter(description = "试卷ID") @PathVariable Long id, 
+            @Parameter(description = "试卷ID") @PathVariable("id") Long id,
             @RequestBody PaperVo paperVo) {
-        return Result.success(null, "试卷更新成功");
+        Paper paper = paperService.updatePaper(id, paperVo);
+        log.info("试卷更新成功：paper={}", paper);
+        return Result.success(paper, "试卷更新成功");
     }
 
     /**
@@ -77,7 +79,9 @@ public class PaperController {
     @PostMapping("/ai")  // 处理POST请求
     @Operation(summary = "AI智能组卷", description = "基于设定的规则（题型分布、难度配比等）使用AI自动生成试卷")  // API描述
     public Result<Paper> createPaperWithAI(@RequestBody AiPaperVo aiPaperVo) {
-        return Result.success(null, "AI智能组卷成功");
+        Paper paper = paperService.createPaperByAI(aiPaperVo);
+        log.info("AI智能组卷成功：paper={}", paper);
+        return Result.success(paper);
     }
 
     /**
@@ -100,9 +104,11 @@ public class PaperController {
     @PostMapping("/{id}/status")  // 处理POST请求
     @Operation(summary = "更新试卷状态", description = "修改试卷状态：发布试卷供学生考试或停止试卷禁止考试")  // API描述
     public Result<Void> updatePaperStatus(
-            @Parameter(description = "试卷ID") @PathVariable Long id, 
-            @Parameter(description = "新的状态，可选值：PUBLISHED/STOPPED") @RequestParam String status) {
-        return Result.success(null, "状态更新成功");
+            @Parameter(description = "试卷ID") @PathVariable("id") Long id,
+            @Parameter(description = "新的状态，可选值：PUBLISHED/STOPPED") @RequestParam("status") String status) {
+        paperService.updatePaperStatus(id, status);
+        log.info("id={}的试卷状态更新成功：status={}", id, status);
+        return Result.success("状态更新成功");
     }
 
     /**

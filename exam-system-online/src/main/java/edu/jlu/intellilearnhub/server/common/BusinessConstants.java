@@ -19,4 +19,14 @@ public final class BusinessConstants {
 
         private final String status;
     }
+
+    @AllArgsConstructor
+    @Getter
+    public enum ExamRecordStatus {
+        DOING("进行中"),
+        FINISHED("已完成"),
+        CHECKED("已批阅");
+
+        private final String status;
+    }
 }

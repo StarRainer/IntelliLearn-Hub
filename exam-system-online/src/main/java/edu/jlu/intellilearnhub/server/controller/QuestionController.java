@@ -41,18 +41,6 @@ public class QuestionController {
 
     /**
      * 分页查询题目列表（支持多条件筛选）
-     * 
-     * RESTful API教学：
-     * - URL：GET /api/questions/list
-     * - 查询参数：通过@RequestParam接收URL查询参数
-     * - 默认值：通过defaultValue设置参数默认值
-     * - 可选参数：通过required = false设置可选参数
-     * 
-     * MyBatis Plus分页教学：
-     * - Page对象：封装分页信息（页码、每页大小、总数等）
-     * - QueryWrapper：动态构建查询条件，避免SQL注入
-     * - 条件构建：支持等值查询(eq)、模糊查询(like)、排序(orderBy)
-     * 
      * @param page 当前页码，从1开始，默认第1页
      * @param size 每页显示数量，默认10条
      * @param questionQueryVo 分页条件

@@ -16,7 +16,7 @@ public class StartExamVo {
             example = "1", 
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "试卷ID不能为空")
-    private Integer paperId; // 试卷ID
+    private Long paperId; // 试卷ID
     
     @Schema(description = "考生姓名", 
             example = "张三", 
