@@ -17,5 +17,9 @@ public interface ExamService extends IService<ExamRecord> {
     ExamRecord getExamRecordById(Long id);
 
     void submitAnswers(Long examRecordId, List<SubmitAnswerVo> submitAnswerVos);
+
+    ExamRecord gradeExam(Long examRecordId);
+
+    ExamRecord getExamRecordWithAnswerById(Long id);
 }
  

@@ -23,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -43,6 +44,8 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
     private QuestionMapper questionMapper;
     @Autowired
     private QuestionChoiceMapper questionChoiceMapper;
+    @Autowired
+    private QuestionAnswerMapper questionAnswerMapper;
 
     @Override
     public List<Paper> listPapers(String name, String status) {
@@ -81,7 +84,7 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
     }
 
     @Override
-    public Paper getPaperById(Long id) {
+    public Paper getPaperWithOutAnswerById(Long id) {
         Paper paper = getById(id);
         List<PaperQuestion> paperQuestions = paperQuestionMapper.selectList(new LambdaQueryWrapper<PaperQuestion>()
                 .eq(PaperQuestion::getPaperId, id)
@@ -102,7 +105,13 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
                 .in(Question::getId, questionIds)
         ).stream().map(question -> {
             question.setPaperScore(questionIdToScore.get(question.getId()));
-            question.setChoices(questionIdToQuestionChoices.get(question.getId()));
+            List<QuestionChoice> questionChoices = questionIdToQuestionChoices.get(question.getId());
+            if (!CollectionUtils.isEmpty(questionChoices)) {
+                questionChoices.forEach(questionChoice -> {
+                    questionChoice.setIsCorrect(null);
+                });
+                question.setChoices(questionChoices);
+            }
             return question;
         }).sorted(
                 Comparator.comparingInt((Question q) -> {
@@ -223,6 +232,50 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
         paper.setQuestionCount(questionCount);
         paper.setTotalScore(totalScore);
         updateById(paper);
+        return paper;
+    }
+
+    @Override
+    public Paper getPaperById(Long examId) {
+        Paper paper = getById(examId);
+        List<PaperQuestion> paperQuestions = paperQuestionMapper.selectList(new LambdaQueryWrapper<PaperQuestion>()
+                .eq(PaperQuestion::getPaperId, examId)
+        );
+        if (CollectionUtils.isEmpty(paperQuestions)) {
+            paper.setQuestions(Collections.emptyList());
+            return paper;
+        }
+        List<Long> questionIds = paperQuestions.stream().map(PaperQuestion::getQuestionId).toList();
+        Map<Long, BigDecimal> questionIdToScore = paperQuestions.stream().collect(Collectors.toMap(PaperQuestion::getQuestionId, PaperQuestion::getScore));
+
+        Map<Long, List<QuestionChoice>> questionIdToQuestionChoices = questionChoiceMapper.selectList(new LambdaQueryWrapper<QuestionChoice>()
+                .in(QuestionChoice::getQuestionId, questionIds)
+                .orderByAsc(QuestionChoice::getSort)
+        ).stream().collect(Collectors.groupingBy(QuestionChoice::getQuestionId));
+
+        Map<Long, QuestionAnswer> questionIdToQuestionAnswer = questionAnswerMapper.selectList(new LambdaQueryWrapper<QuestionAnswer>()
+                .in(QuestionAnswer::getQuestionId, questionIds)
+        ).stream().collect(Collectors.toMap(QuestionAnswer::getQuestionId, Function.identity(), (a, b) -> a));
+
+        List<Question> questions = questionMapper.selectList(new LambdaQueryWrapper<Question>()
+                        .in(Question::getId, questionIds)
+                ).stream().map(question -> {
+                    question.setPaperScore(questionIdToScore.get(question.getId()));
+                    question.setChoices(questionIdToQuestionChoices.get(question.getId()));
+                    question.setAnswer(questionIdToQuestionAnswer.get(question.getId()));
+                    return question;
+                }).sorted(
+                        Comparator.comparingInt((Question q) -> {
+                                    String type = q.getType();
+                                    if ("CHOICE".equals(type)) return 1;
+                                    if ("JUDGE".equals(type)) return 2;
+                                    if ("TEXT".equals(type)) return 3;
+                                    return 4;
+                                })
+                                .thenComparing(Question::getId)
+                )
+                .toList();
+        paper.setQuestions(questions);
         return paper;
     }
 }

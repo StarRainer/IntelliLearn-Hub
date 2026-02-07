@@ -65,7 +65,9 @@ public class ExamController {
     @Operation(summary = "AI自动批阅", description = "使用AI技术自动批阅试卷，特别是简答题的智能评分")  // API描述
     public Result<ExamRecord> gradeExam(
             @Parameter(description = "考试记录ID") @PathVariable("examRecordId") Long examRecordId) {
-        return Result.success(null, "试卷批阅完成");
+        ExamRecord examRecord = examService.gradeExam(examRecordId);
+        log.info("试卷批阅完成：examRecord={}", examRecord);
+        return Result.success(examRecord);
     }
 
     /**
@@ -77,6 +79,18 @@ public class ExamController {
             @Parameter(description = "考试记录ID") @PathVariable("id") Long id) {
         ExamRecord examRecord = examService.getExamRecordById(id);
         log.info("考试记录详情查询成功：examRecord={}", examRecord);
+        return Result.success(examRecord);
+    }
+
+    /**
+     * 根据ID获取带答案的考试记录详情 - 查询具体考试结果
+     */
+    @GetMapping("/answer/{id}")  // 处理GET请求
+    @Operation(summary = "查询考试记录详情", description = "获取指定考试记录的详细信息，包括答题情况和得分")  // API描述
+    public Result<ExamRecord> getExamRecordWithAnswerById(
+            @Parameter(description = "考试记录ID") @PathVariable("id") Long id) {
+        ExamRecord examRecord = examService.getExamRecordWithAnswerById(id);
+        log.info("带答案的考试记录详情查询成功：examRecord={}", examRecord);
         return Result.success(examRecord);
     }
 
