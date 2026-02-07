@@ -5,6 +5,7 @@ import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 import dev.langchain4j.service.spring.AiService;
 import edu.jlu.intellilearnhub.server.vo.AiGenerateRequestVo;
+import edu.jlu.intellilearnhub.server.vo.GradeExamVo;
 import edu.jlu.intellilearnhub.server.vo.QuestionImportVo;
 
 import java.util.List;
@@ -24,4 +25,11 @@ public interface AIService {
                                                   @V("categoryId") Long categoryId,
                                                   @V("includeMultiple") Boolean includeMultiple,
                                                   @V("requirements") String requirements);
+
+    @UserMessage(fromResource = "prompts/grade-exam.txt")
+    GradeExamVo gradeExam(@V("title") String title,
+                          @V("answer") String answer,
+                          @V("keywords") String keywords,
+                          @V("score") Integer score,
+                          @V("studentAnswer") String studentAnswer);
 } 

@@ -18,7 +18,7 @@ import java.util.Map;
 public class ExamRankingVO implements Serializable {
 
     @Schema(description = "考试记录ID", example = "1")
-    private Integer id; // 考试记录ID
+    private Long id; // 考试记录ID
 
     @Schema(description = "考生姓名", example = "张三")
     private String studentName; // 考生姓名
@@ -27,7 +27,7 @@ public class ExamRankingVO implements Serializable {
     private Integer score; // 考试得分
 
     @Schema(description = "试卷ID", example = "1")
-    private Integer examId; // 试卷ID
+    private Long examId; // 试卷ID
 
     @Schema(description = "试卷名称", example = "Java基础知识测试")
     private String paperName; // 试卷名称（通过关联查询获取）

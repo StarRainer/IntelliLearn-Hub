@@ -5,13 +5,11 @@ import edu.jlu.intellilearnhub.server.entity.Paper;
 import edu.jlu.intellilearnhub.server.service.PaperService;
 import edu.jlu.intellilearnhub.server.vo.AiPaperVo;
 import edu.jlu.intellilearnhub.server.vo.PaperVo;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -90,7 +88,7 @@ public class PaperController {
     @GetMapping("/{id}")  // 处理GET请求
     @Operation(summary = "获取试卷详情", description = "获取试卷的详细信息，包括试卷基本信息和包含的所有题目")  // API描述
     public Result<Paper> getPaperById(@Parameter(description = "试卷ID") @PathVariable("id") Long id) {
-        Paper paper = paperService.getPaperById(id);
+        Paper paper = paperService.getPaperWithOutAnswerById(id);
         log.info("试卷详情查询成功：paper={}", paper);
         return Result.success(paper);
     }

@@ -16,7 +16,7 @@ public interface PaperService extends IService<Paper> {
 
     Paper createPaper(PaperVo paperVo);
 
-    Paper getPaperById(Long id);
+    Paper getPaperWithOutAnswerById(Long id);
 
     void deletePaperById(Long id);
 
@@ -25,4 +25,6 @@ public interface PaperService extends IService<Paper> {
     Paper updatePaper(Long id, PaperVo paperVo);
 
     Paper createPaperByAI(AiPaperVo aiPaperVo);
+
+    Paper getPaperById(Long examId);
 }

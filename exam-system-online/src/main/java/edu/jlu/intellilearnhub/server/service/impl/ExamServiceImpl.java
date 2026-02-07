@@ -7,10 +7,12 @@ import edu.jlu.intellilearnhub.server.exception.CommonException;
 import edu.jlu.intellilearnhub.server.mapper.AnswerRecordMapper;
 import edu.jlu.intellilearnhub.server.mapper.ExamRecordMapper;
 import edu.jlu.intellilearnhub.server.mapper.PaperMapper;
+import edu.jlu.intellilearnhub.server.service.AIService;
 import edu.jlu.intellilearnhub.server.service.AnswerRecordService;
 import edu.jlu.intellilearnhub.server.service.ExamService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.jlu.intellilearnhub.server.service.PaperService;
+import edu.jlu.intellilearnhub.server.vo.GradeExamVo;
 import edu.jlu.intellilearnhub.server.vo.StartExamVo;
 import edu.jlu.intellilearnhub.server.vo.SubmitAnswerVo;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,8 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
     private AnswerRecordMapper answerRecordMapper;
     @Autowired
     private AnswerRecordService answerRecordService;
+    @Autowired
+    private AIService aiService;
 
     @Override
     public ExamRecord saveExam(StartExamVo startExamVo) {
@@ -90,10 +94,16 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
         }
 
         // 获取试卷
-        Paper paper = paperService.getPaperById(examRecord.getExamId());
+        Paper paper = paperService.getPaperWithOutAnswerById(examRecord.getExamId());
         examRecord.setPaper(paper);
 
         // 获取答题记录
+        fillWithExamAnswerRecords(id, paper, examRecord);
+
+        return examRecord;
+    }
+
+    private void fillWithExamAnswerRecords(Long id, Paper paper, ExamRecord examRecord) {
         List<AnswerRecord> answerRecords = answerRecordMapper.selectList(new LambdaQueryWrapper<AnswerRecord>()
                 .eq(AnswerRecord::getExamRecordId, id)
         );
@@ -113,8 +123,6 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
 
             examRecord.setAnswerRecords(sortedAnswerRecords);
         }
-
-        return examRecord;
     }
 
     @Override
@@ -143,5 +151,115 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
         }
         examRecord.setStatus(BusinessConstants.ExamRecordStatus.FINISHED.getStatus());
         updateById(examRecord);
+
+        gradeExam(examRecordId);
+    }
+
+    @Override
+    public ExamRecord getExamRecordWithAnswerById(Long id) {
+        ExamRecord examRecord = getById(id);
+        if (examRecord == null) {
+            throw new CommonException("考试记录已经被删除，无法查看");
+        }
+        if (BusinessConstants.ExamRecordStatus.DOING.getStatus().equals(examRecord.getStatus())) {
+            throw new CommonException("考试正在进行中，无法查看考试结果");
+        }
+        Paper paper = paperService.getPaperById(examRecord.getExamId());
+        examRecord.setPaper(paper);
+        // 获取答题记录
+        fillWithExamAnswerRecords(id, paper, examRecord);
+        return examRecord;
+    }
+
+    @Override
+    public ExamRecord gradeExam(Long examRecordId) {
+        ExamRecord examRecord = getExamRecordWithAnswerById(examRecordId);
+        if (!BusinessConstants.ExamRecordStatus.FINISHED.getStatus().equals(examRecord.getStatus())) {
+            throw new CommonException("试卷批阅失败，只有已提交的试卷才可以批阅");
+        }
+        Paper paper = examRecord.getPaper();
+        if (paper == null) {
+            examRecord.setStatus(BusinessConstants.ExamRecordStatus.CHECKED.getStatus());
+            examRecord.setAnswers("考试记录对应的试卷已经被删除，无法正常判卷");
+            examRecord.setScore(0);
+            updateById(examRecord);
+            log.warn("id={}的考试记录没有正常判卷，因为其对应的试卷已经被删除", examRecordId);
+            return examRecord;
+        }
+        List<AnswerRecord> answerRecords = examRecord.getAnswerRecords();
+        if (CollectionUtils.isEmpty(answerRecords)) {
+            examRecord.setStatus(BusinessConstants.ExamRecordStatus.CHECKED.getStatus());
+            examRecord.setAnswers("学生提交了白卷，直接零分");
+            examRecord.setScore(0);
+            updateById(examRecord);
+            log.warn("id={}的考试记录直接判为0分，因为学生没有答卷", examRecordId);
+            return examRecord;
+        }
+        int correctQuestionCount = 0, totalScore = 0;
+        Map<Long, Question> questionIdToQuestion = paper.getQuestions().stream().collect(Collectors.toMap(Question::getId, Function.identity(), (a, b) -> a));
+        for (AnswerRecord answerRecord : answerRecords) {
+            Question question = questionIdToQuestion.get(answerRecord.getQuestionId());
+            // 如果题目已经被删除，那么直接判下一题
+            if (question == null) {
+                continue;
+            }
+
+            String correctAnswer = question.getAnswer().getAnswer();
+            String studentAnswer = answerRecord.getUserAnswer();
+            if ("JUDGE".equals(question.getType())) {
+                studentAnswer = studentAnswerToTureOrFalse(studentAnswer);
+            }
+
+            try {
+                if (!"TEXT".equals(question.getType())) {
+                    if (studentAnswer.equalsIgnoreCase(correctAnswer)) {
+                        answerRecord.setIsCorrect(1);
+                        answerRecord.setScore(question.getPaperScore().intValue());
+                    } else {
+                        answerRecord.setIsCorrect(0);
+                        answerRecord.setScore(0);
+                    }
+                } else {
+                    GradeExamVo gradeExamVo = aiService.gradeExam(
+                            question.getTitle(),
+                            question.getAnswer().getAnswer(),
+                            question.getAnswer().getKeywords(),
+                            question.getPaperScore().intValue(),
+                            studentAnswer
+                    );
+                    answerRecord.setScore(gradeExamVo.getScore());
+                    answerRecord.setAiCorrection(gradeExamVo.getReason());
+                    if (question.getPaperScore().intValue() <= gradeExamVo.getScore()) {
+                        answerRecord.setIsCorrect(1);
+                    } else if (gradeExamVo.getScore() <= 0) {
+                        answerRecord.setIsCorrect(0);
+                    } else {
+                        answerRecord.setIsCorrect(1);
+                    }
+                }
+            } catch (Exception e) {
+                answerRecord.setIsCorrect(0);
+                answerRecord.setScore(0);
+                answerRecord.setAiCorrection("判断过程中报错了，所以此题直接0分");
+            }
+            totalScore += answerRecord.getScore();
+            if (answerRecord.getIsCorrect() == 1) {
+                correctQuestionCount++;
+            }
+        }
+        answerRecordService.updateBatchById(answerRecords);
+        examRecord.setScore(totalScore);
+        examRecord.setStatus(BusinessConstants.ExamRecordStatus.CHECKED.getStatus());
+        updateById(examRecord);
+        return examRecord;
+    }
+
+    private String studentAnswerToTureOrFalse(String studentAnswer) {
+        studentAnswer = studentAnswer.toUpperCase();
+        return switch (studentAnswer) {
+            case "T", "正确", "对", "TRUE" -> "TRUE";
+            case "F", "错误", "错", "不对", "FALSE" -> "FALSE";
+            default -> studentAnswer;
+        };
     }
 }
