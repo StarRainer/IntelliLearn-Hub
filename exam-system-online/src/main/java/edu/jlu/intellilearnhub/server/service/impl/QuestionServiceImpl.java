@@ -84,6 +84,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     }
 
     private void fillQuestionWithChoiceAndAnswer(List<Question> questions) {
+        if (CollectionUtils.isEmpty(questions)) {
+            return;
+        }
         List<Long> questionIds = questions.stream().map(Question::getId).toList();
 
         Map<Long, QuestionAnswer> questionIdToQuestionAnswer = questionAnswerMapper.selectList(new LambdaQueryWrapper<QuestionAnswer>()

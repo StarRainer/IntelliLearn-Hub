@@ -7,10 +7,12 @@ import edu.jlu.intellilearnhub.server.exception.CommonException;
 import edu.jlu.intellilearnhub.server.mapper.AnswerRecordMapper;
 import edu.jlu.intellilearnhub.server.mapper.ExamRecordMapper;
 import edu.jlu.intellilearnhub.server.mapper.PaperMapper;
+import edu.jlu.intellilearnhub.server.service.AIService;
 import edu.jlu.intellilearnhub.server.service.AnswerRecordService;
 import edu.jlu.intellilearnhub.server.service.ExamService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.jlu.intellilearnhub.server.service.PaperService;
+import edu.jlu.intellilearnhub.server.vo.GradeExamVo;
 import edu.jlu.intellilearnhub.server.vo.StartExamVo;
 import edu.jlu.intellilearnhub.server.vo.SubmitAnswerVo;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,8 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
     private AnswerRecordMapper answerRecordMapper;
     @Autowired
     private AnswerRecordService answerRecordService;
+    @Autowired
+    private AIService aiService;
 
     @Override
     public ExamRecord saveExam(StartExamVo startExamVo) {
@@ -216,8 +220,22 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
                         answerRecord.setScore(0);
                     }
                 } else {
-                    answerRecord.setIsCorrect(1);
-                    answerRecord.setScore(question.getPaperScore().intValue());
+                    GradeExamVo gradeExamVo = aiService.gradeExam(
+                            question.getTitle(),
+                            question.getAnswer().getAnswer(),
+                            question.getAnswer().getKeywords(),
+                            question.getPaperScore().intValue(),
+                            studentAnswer
+                    );
+                    answerRecord.setScore(gradeExamVo.getScore());
+                    answerRecord.setAiCorrection(gradeExamVo.getReason());
+                    if (question.getPaperScore().intValue() <= gradeExamVo.getScore()) {
+                        answerRecord.setIsCorrect(1);
+                    } else if (gradeExamVo.getScore() <= 0) {
+                        answerRecord.setIsCorrect(0);
+                    } else {
+                        answerRecord.setIsCorrect(1);
+                    }
                 }
             } catch (Exception e) {
                 answerRecord.setIsCorrect(0);
