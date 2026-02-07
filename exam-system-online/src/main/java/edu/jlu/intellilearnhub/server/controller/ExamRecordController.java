@@ -1,14 +1,17 @@
 package edu.jlu.intellilearnhub.server.controller;
 
 import edu.jlu.intellilearnhub.server.common.Result;
+import edu.jlu.intellilearnhub.server.entity.Exam;
 import edu.jlu.intellilearnhub.server.entity.ExamRecord;
 import edu.jlu.intellilearnhub.server.service.ExamRecordService;
+import edu.jlu.intellilearnhub.server.service.ExamService;
 import edu.jlu.intellilearnhub.server.vo.ExamRankingVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +27,16 @@ import java.util.List;
 @RequestMapping("/api/exam-records")  // 考试记录API路径前缀
 @Tag(name = "考试记录管理", description = "考试记录相关操作，包括记录查询、成绩管理、排行榜展示等功能")  // Swagger API分组
 @CrossOrigin
+@Slf4j
 public class ExamRecordController {
 
 
     private final ExamRecordService examRecordService;
+    private final ExamService examService;
 
-    public ExamRecordController(ExamRecordService examRecordService) {
+    public ExamRecordController(ExamRecordService examRecordService, ExamService examService) {
         this.examRecordService = examRecordService;
+        this.examService = examService;
     }
 
     /**
@@ -54,25 +60,15 @@ public class ExamRecordController {
     }
 
     /**
-     * 根据ID获取考试记录详情
-     */
-    @GetMapping("/{id}")  // 处理GET请求
-    @Operation(summary = "获取考试记录详情", description = "根据记录ID获取考试记录的详细信息，包括试卷内容和答题情况")  // API描述
-    public Result<ExamRecord> getExamRecordById(
-            @Parameter(description = "考试记录ID") @PathVariable Integer id) {
-
-        return Result.success(null);
-    }
-
-    /**
      * 删除考试记录
      */
     @DeleteMapping("/{id}")  // 处理DELETE请求
     @Operation(summary = "删除考试记录", description = "根据ID删除指定的考试记录")  // API描述
     public Result<Void> deleteExamRecord(
             @Parameter(description = "考试记录ID") @PathVariable("id") Long id) {
-
-         return Result.error("删除失败");
+        examRecordService.removeExamRecordById(id);
+        log.info("删除id={}的考试记录成功", id);
+        return Result.success("删除考试记录成功");
     }
 
     /**
@@ -86,11 +82,11 @@ public class ExamRecordController {
     @GetMapping("/ranking")  // 处理GET请求
     @Operation(summary = "获取考试排行榜", description = "获取考试成绩排行榜，支持按试卷筛选和限制显示数量，使用优化的SQL关联查询提升性能")  // API描述
     public Result<List<ExamRankingVO>> getExamRanking(
-            @Parameter(description = "试卷ID，可选，不传则显示所有试卷的排行") @RequestParam(required = false) Integer paperId,
-            @Parameter(description = "显示数量限制，可选，不传则返回所有记录") @RequestParam(required = false) Integer limit
+            @Parameter(description = "试卷ID，可选，不传则显示所有试卷的排行") @RequestParam(value = "paperId", required = false) Long paperId,
+            @Parameter(description = "显示数量限制，可选，不传则返回所有记录") @RequestParam(value = "limit", required = false) Integer limit
     ) {
-        // 使用优化的查询方法，避免N+1查询问题
-
-        return Result.success(null);
+        List<ExamRankingVO> examRankingVOs = examRecordService.getExamRanking(paperId, limit);
+        log.info("获取考试排行榜信息成功：examRankingVOs={}", examRankingVOs);
+        return Result.success(examRankingVOs);
     }
 } 
